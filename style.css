@@ -1,7 +1,7 @@
 body, textarea {
     font-family: "Droid Sans", "Verdana";
 }
-#output, #input {
-    height: 200px;
+#output {
+    height: 100px;
     width: 100%;
 }

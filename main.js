@@ -1,9 +1,10 @@
 var text = document.getElementById('text');
-var input = document.getElementById('input');
 var output = document.getElementById('output');
 var clock = document.getElementById('clock');
+var results = document.getElementById('results');
 var startTime, timer;
 var round = 0;
+var typed;
 
 var texts = [
     "Je moet even deze tekst typen okee?",
@@ -11,20 +12,26 @@ var texts = [
     "Hop hop, geen foutjes maken euj."
 ];
 
-function firstKeyUp()
+function firstKeyUp(evt)
 {
-    input.removeEventListener('keyup', firstKeyUp);
-    input.addEventListener('keyup', keyUp);
-    keyUp();
+    document.removeEventListener('keypress', firstKeyUp);
+    document.addEventListener('keypress', keyUp);
+    keyUp(evt);
     startRound();
 }
-function keyUp()
+function keyUp(evt)
 {
-    var currentText = input.value;
-    output.textContent = currentText;
-    if (currentText === texts[round]) {
+    evt.preventDefault();
+    if (evt.keyCode === 8) {
+        typed = typed.substr(0, Math.max(0, typed.length-1));
+    } else {
+        typed += evt.key;
+    }
+    output.textContent = typed;
+    if (typed === texts[round]) {
         finishRound();
     }
+    return false;
 }
 
 function startRound()
@@ -35,27 +42,25 @@ function startRound()
 function timerStep()
 {
     var passed = (new Date()).getTime() - startTime;
-    clock.textContent = passed/1000;
+    clock.textContent = (passed/1000).toFixed(1);
 }
-
-input.addEventListener('blur', function (event) {
-    setTimeout(function () { input.focus(); }, 20);
-});
 
 function finishRound()
 {
     clearInterval(timer);
     var passed = (new Date()).getTime() - startTime;
-    input.removeEventListener('keyup', keyUp);
-    input.value = "";
+    var cpm = texts[round].length / passed * 1000 * 60;
+    document.removeEventListener('keypress', keyUp);
+    results.textContent += "#" + (round+1) + ": " + cpm.toFixed(0) + " cpm - " + texts[round].length + " characters in " + (passed/1000).toFixed(2) + " seconds.\n";
     round++;
     initRound();
 }
 
 function initRound()
 {
+    typed = "";
+    output.textContent = typed;
     text.textContent = texts[round];
-    input.focus();
-    input.addEventListener('keyup', firstKeyUp);
+    document.addEventListener('keypress', firstKeyUp);
 }
 initRound();
