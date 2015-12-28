@@ -44,3 +44,8 @@ peer.on('connection', function(connection) {
     setupDisconnectButton();
     setupPeer(conn);
 });
+
+
+peer.on('error', function(err) {
+    console.log(err);
+})

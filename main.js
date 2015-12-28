@@ -2,6 +2,7 @@ var text = document.getElementById('text');
 var output = document.getElementById('output');
 var clock = document.getElementById('clock');
 var results = document.getElementById('results');
+var gameButton = document.getElementById('gameButton');
 var startTime, timer;
 var round = 0;
 var typed;
@@ -29,7 +30,7 @@ function keyUp(evt)
     }
     output.textContent = typed;
     if (typed === texts[round]) {
-        finishRound();
+        finishRound(true);
     }
     return false;
 }
@@ -45,15 +46,20 @@ function timerStep()
     clock.textContent = (passed/1000).toFixed(1);
 }
 
-function finishRound()
+function finishRound(finish)
 {
     clearInterval(timer);
-    var passed = (new Date()).getTime() - startTime;
-    var cpm = texts[round].length / passed * 1000 * 60;
     document.removeEventListener('keypress', keyUp);
-    results.textContent += "#" + (round+1) + ": " + cpm.toFixed(0) + " cpm - " + texts[round].length + " characters in " + (passed/1000).toFixed(2) + " seconds.\n";
-    round++;
-    initRound();
+    document.removeEventListener('keypress', firstKeyUp);
+
+    if (finish) {
+        var passed = (new Date()).getTime() - startTime;
+        var cpm = texts[round].length / passed * 1000 * 60;
+        results.textContent += "#" + (round+1) + ": " + cpm.toFixed(0) + " cpm - " + texts[round].length + " characters in " + (passed/1000).toFixed(2) + " seconds.\n";
+
+        round++;
+        initRound();
+    }
 }
 
 function initRound()
@@ -61,6 +67,21 @@ function initRound()
     typed = "";
     output.textContent = typed;
     text.textContent = texts[round];
-    // document.addEventListener('keypress', firstKeyUp);
+    document.addEventListener('keypress', firstKeyUp);
 }
-initRound();
+
+function initClick()
+{
+    gameButton.removeEventListener('click', initClick);
+    gameButton.textContent = 'Stop';
+    gameButton.addEventListener('click', stopAll);
+    initRound();
+}
+function stopAll()
+{
+    finishRound(false);
+    gameButton.removeEventListener('click', stopAll);
+    gameButton.textContent = 'Get ready';
+    gameButton.addEventListener('click', initClick);
+}
+gameButton.addEventListener('click', initClick);

@@ -15,6 +15,8 @@ function chatSubmit(evt)
         var message = chatInput.value;
         conn.send(message);
         log('You', message);
+        chatInput.value = "";
+        chatInput.focus();
     }
 }
 
