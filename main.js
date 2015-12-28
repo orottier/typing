@@ -61,6 +61,6 @@ function initRound()
     typed = "";
     output.textContent = typed;
     text.textContent = texts[round];
-    document.addEventListener('keypress', firstKeyUp);
+    // document.addEventListener('keypress', firstKeyUp);
 }
 initRound();

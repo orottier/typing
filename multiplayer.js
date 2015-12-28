@@ -1,5 +1,3 @@
-var communication = document.getElementById('communication');
-
 var peer = new Peer({key: 'uwzql1hzgiepnwmi'});
 peer.on('open', function(id) {
       document.getElementById('peerKey').textContent = id;
@@ -30,16 +28,19 @@ function setupPeer(conn)
         // Receive messages
         conn.on('data', function(data) {
             console.log('Received', data);
-            communication.textContent += data + "\n";
+            log('Remote', data);
         });
 
         // Send messages
         conn.send('Hello!');
+
+        enableChat();
     });
 }
 
 
-peer.on('connection', function(conn) {
+peer.on('connection', function(connection) {
+    conn = connection;
     setupDisconnectButton();
     setupPeer(conn);
 });
