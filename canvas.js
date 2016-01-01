@@ -1,13 +1,20 @@
-var canvas = document.getElementById('canvas');
-
 var imageRepository = new function() {
     this.background = new Image();
     this.background.src = 'images/stars.png';
+
+    this.grass = new Image();
+    this.grass.src = 'images/grass.png';
+
+    this.elephant = [];
+    for(var i=1; i<=6; i++) {
+        var frame = new Image();
+        frame.src = 'images/elephant/elephant' + i + '.png';
+        this.elephant.push(frame);
+    }
 };
 
 // abstract class
 var Drawable = function(x, y) {
-    console.log("New Drawable", x, y);
     this.x = x;
     this.y = y;
     this.speed = 0;
@@ -18,57 +25,85 @@ var Drawable = function(x, y) {
 }
 
 var Background = function(image) {
-    console.log("New background", image);
     Drawable.call(this, 0, 0);
     this.image = image;
     this.speed = 1;
+    this.scale = Math.min(image.width/this.canvasWidth, image.height/this.canvasHeight);
     // Implement abstract function
     this.draw = function() {
         // Pan background
         this.x -= this.speed;
-        this.context.drawImage(image, this.x, this.y);
+        this.context.drawImage(image, this.x, this.y, image.width/this.scale, image.height/this.scale);
         // Draw another image at the top edge of the first image
-        this.context.drawImage(image, this.x + this.canvasWidth, this.y);
+        this.context.drawImage(image, this.x + this.canvasWidth, this.y, image.width/this.scale, image.height/this.scale);
 
-        // If the image scrolled off the screen, reset
         if (this.x <= -this.canvasWidth) {
-            this.x = 0;
+            this.x += image.width/this.scale;
         }
     };
 }
 
-var Game = function() {
+var Elephant = function(frameImages) {
+    this.counter = 0;
+    this.speed = 1;
+    this.fps = 5;
+    this.draw = function() {
+        this.counter += 1;
+        if (this.counter >= frameImages.length*this.fps) {
+            this.counter = 0;
+        }
+        this.context.drawImage(frameImages[Math.floor(this.counter/this.speed/this.fps)], 10, 100, 35, 35);
+    }
+}
+
+var Game = function(canvas) {
+    this.objects = [];
+    this.canvas = canvas;
     this.init = function() {
-        // Get the canvas element
-        this.bgCanvas = document.getElementById('canvas');
         // Test to see if canvas is supported
-        if (this.bgCanvas.getContext) {
-            this.bgContext = this.bgCanvas.getContext('2d');
+        if (this.canvas.getContext) {
+            this.context = this.canvas.getContext('2d');
 
-            Drawable.prototype.context = this.bgContext;
-            Drawable.prototype.canvasWidth = this.bgCanvas.width;
-            Drawable.prototype.canvasHeight = this.bgCanvas.height;
+            Drawable.prototype.context = this.context;
+            Drawable.prototype.canvasWidth = this.canvas.width;
+            Drawable.prototype.canvasHeight = this.canvas.height;
 
-            // Set Background to inherit properties from Drawable
             Background.prototype = Object.create(Drawable.prototype);
             Background.prototype.constructor = Background;
+            Elephant.prototype = Object.create(Drawable.prototype);
+            Elephant.prototype.constructor = Elephant;
 
-            this.background = new Background(imageRepository.background);
+            this.place(new Background(imageRepository.background), 0);
+            this.place(new Elephant(imageRepository.elephant), 10);
+            var grass = new Background(imageRepository.grass);
+            grass.speed = 5;
+            this.place(grass, 20);
             return true;
         } else {
             return false;
         }
     };
 
+    this.place = function(object, zIndex) {
+        for(var position=0; position<this.objects.length; position++) {
+            if (this.objects.zIndex > zIndex) {
+                break;
+            }
+        }
+        this.objects.splice(position, 0, {'zIndex': zIndex, 'object': object});
+    }
+
     // Start the animation loop
     this.start = function() {
-        animate();
+        this.animate();
     };
-}
 
-function animate() {
-	requestAnimFrame( animate );
-	game.background.draw();
+    this.animate = function () {
+        requestAnimFrame( this.animate.bind(this) );
+        for(var i=0; i<this.objects.length; i++) {
+            this.objects[i].object.draw();
+        }
+    }
 }
 
 /**
@@ -82,12 +117,13 @@ window.requestAnimFrame = (function(){
             window.mozRequestAnimationFrame    ||
             window.oRequestAnimationFrame      ||
             window.msRequestAnimationFrame     ||
-            function(/* function */ callback, /* DOMElement */ element){
+            function(callback, element) {
                 window.setTimeout(callback, 1000 / 60);
             };
 })();
 
-var game = new Game();
-if(game.init()) {
+var canvas = document.getElementById('canvas');
+var game = new Game(canvas);
+if (game.init()) {
     game.start();
 }
