@@ -23,14 +23,14 @@ var Drawable = function(x, y) {
     };
 }
 
-var Background = function(image) {
+var Background = function(image, speedScale) {
     Drawable.call(this, 0, 0);
     this.image = image;
     this.scale = Math.min(image.width/this.canvasWidth, image.height/this.canvasHeight);
     // Implement abstract function
     this.draw = function() {
         // Pan background
-        this.x -= this.game.speed/10;
+        this.x -= this.game.speed/speedScale;
         this.context.drawImage(image, this.x, this.y, image.width/this.scale, image.height/this.scale);
         // Draw another image at the top edge of the first image
         this.context.drawImage(image, this.x + this.canvasWidth, this.y, image.width/this.scale, image.height/this.scale);
@@ -62,9 +62,17 @@ var TextScroll = function() {
 }
 
 var Game = function(canvas) {
-    this.speed = 10;
-    this.objects = [];
     this.canvas = canvas;
+
+    // elephant properties
+    this.distance = 0; // current position
+    this.targetDistance = 0; // desired position
+    this.speed = 0; // current speed to get to the target position (read only!)
+
+    // to be drawn on each frame
+    this.objects = [];
+    this.previousTime = 0;
+
     this.init = function() {
         // Test to see if canvas is supported
         if (this.canvas.getContext) {
@@ -86,9 +94,9 @@ var Game = function(canvas) {
             TextScroll.prototype = Object.create(Drawable.prototype);
             TextScroll.prototype.constructor = TextScroll;
 
-            this.place(new Background(imageRepository.background), 0);
+            this.place(new Background(imageRepository.background, 100), 0);
             this.place(new Elephant(imageRepository.elephant), 10);
-            var grass = new Background(imageRepository.grass);
+            var grass = new Background(imageRepository.grass, 10);
             this.place(grass, 20);
             this.place(new TextScroll(), 100);
             return true;
@@ -113,11 +121,32 @@ var Game = function(canvas) {
 
     this.animate = function () {
         requestAnimFrame( this.animate.bind(this) );
+
+        var now = (new Date()).getTime();
+        this.fps = 1000/(now - this.previousTime);
+        this.previousTime = now;
+        this.setSpeed();
+        this.distance += this.speed/this.fps;
+        console.log('speed', this.speed, 'distance', this.distance);
+
         this.context.fillStyle = 'rgb(255,255,255)';
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.context.fillStyle = 'rgb(127,127,127)';
         for(var i=0; i<this.objects.length; i++) {
             this.objects[i].object.draw();
+        }
+    }
+
+    this.walk = function(distance) {
+        this.targetDistance += distance;
+    }
+    this.setSpeed = function() {
+        var diff = 1.0*(this.targetDistance - this.distance);
+        if (diff < 1) {
+            this.speed = 0;
+            this.distance = this.targetDistance;
+        } else {
+            this.speed = (this.speed + diff) / 2; //smooth
         }
     }
 }
