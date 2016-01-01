@@ -17,7 +17,6 @@ var imageRepository = new function() {
 var Drawable = function(x, y) {
     this.x = x;
     this.y = y;
-    this.speed = 0;
 
     // Define abstract function to be implemented in child objects
     this.draw = function() {
@@ -27,43 +26,55 @@ var Drawable = function(x, y) {
 var Background = function(image) {
     Drawable.call(this, 0, 0);
     this.image = image;
-    this.speed = 1;
     this.scale = Math.min(image.width/this.canvasWidth, image.height/this.canvasHeight);
     // Implement abstract function
     this.draw = function() {
         // Pan background
-        this.x -= this.speed;
+        this.x -= this.game.speed/10;
         this.context.drawImage(image, this.x, this.y, image.width/this.scale, image.height/this.scale);
         // Draw another image at the top edge of the first image
         this.context.drawImage(image, this.x + this.canvasWidth, this.y, image.width/this.scale, image.height/this.scale);
 
         if (this.x <= -this.canvasWidth) {
-            this.x += image.width/this.scale;
+            this.x = 0;
         }
     };
 }
 
 var Elephant = function(frameImages) {
     this.counter = 0;
-    this.speed = 1;
     this.fps = 5;
     this.draw = function() {
         this.counter += 1;
-        if (this.counter >= frameImages.length*this.fps) {
+        var frame = Math.floor(this.counter/100*this.game.speed);
+        if (frame >= frameImages.length) {
             this.counter = 0;
+            frame = 0;
         }
-        this.context.drawImage(frameImages[Math.floor(this.counter/this.speed/this.fps)], 10, 100, 35, 35);
+        this.context.drawImage(frameImages[frame], 10, 100, 85, 85);
+    }
+}
+
+var TextScroll = function() {
+    this.draw = function() {
+        this.context.fillText("Je moet even deze tekst typen, joo?", 130, 130);
     }
 }
 
 var Game = function(canvas) {
+    this.speed = 10;
     this.objects = [];
     this.canvas = canvas;
     this.init = function() {
         // Test to see if canvas is supported
         if (this.canvas.getContext) {
-            this.context = this.canvas.getContext('2d');
+            this.context = this.canvas.getContext('2d', {
+                alpha: false,
+                antialias: true,
+            });
+            this.context.font = "30px 'sans serif'";
 
+            Drawable.prototype.game = this;
             Drawable.prototype.context = this.context;
             Drawable.prototype.canvasWidth = this.canvas.width;
             Drawable.prototype.canvasHeight = this.canvas.height;
@@ -72,12 +83,14 @@ var Game = function(canvas) {
             Background.prototype.constructor = Background;
             Elephant.prototype = Object.create(Drawable.prototype);
             Elephant.prototype.constructor = Elephant;
+            TextScroll.prototype = Object.create(Drawable.prototype);
+            TextScroll.prototype.constructor = TextScroll;
 
             this.place(new Background(imageRepository.background), 0);
             this.place(new Elephant(imageRepository.elephant), 10);
             var grass = new Background(imageRepository.grass);
-            grass.speed = 5;
             this.place(grass, 20);
+            this.place(new TextScroll(), 100);
             return true;
         } else {
             return false;
@@ -100,6 +113,9 @@ var Game = function(canvas) {
 
     this.animate = function () {
         requestAnimFrame( this.animate.bind(this) );
+        this.context.fillStyle = 'rgb(255,255,255)';
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.fillStyle = 'rgb(127,127,127)';
         for(var i=0; i<this.objects.length; i++) {
             this.objects[i].object.draw();
         }
