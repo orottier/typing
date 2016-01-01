@@ -189,10 +189,10 @@ var Game = function(canvas) {
         this.targetDistance += distance;
     }
     this.setSpeed = function() {
-        var diff = 1.0*(this.targetDistance - this.distance);
-        if (diff < 5) {
+        var diff = this.targetDistance - this.distance;
+        if (diff < 2) {
             this.speed = 0;
-            this.distance = this.targetDistance;
+            this.targetDistance = this.distance;
         } else {
             this.speed = (this.speed + diff) / 2; //smooth
         }
