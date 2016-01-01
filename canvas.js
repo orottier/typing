@@ -1,9 +1,12 @@
 var imageRepository = new function() {
     this.background = new Image();
-    this.background.src = 'images/stars.png';
+    this.background.src = 'images/sprites/background.png';
+
+    this.background2 = new Image();
+    this.background2.src = 'images/sprites/forest.png';
 
     this.grass = new Image();
-    this.grass.src = 'images/grass.png';
+    this.grass.src = 'images/sprites/road.png';
 
     this.elephant = [];
     for(var i=1; i<=6; i++) {
@@ -26,17 +29,14 @@ var Drawable = function(x, y) {
 var Background = function(image, speedScale) {
     Drawable.call(this, 0, 0);
     this.image = image;
-    this.scale = Math.min(image.width/this.canvasWidth, image.height/this.canvasHeight);
+    this.scale = 1; //Math.min(image.width/this.canvasWidth, image.height/this.canvasHeight);
     // Implement abstract function
     this.draw = function() {
-        // Pan background
-        this.x -= this.game.speed/speedScale;
-        this.context.drawImage(image, this.x, this.y, image.width/this.scale, image.height/this.scale);
-        // Draw another image at the top edge of the first image
-        this.context.drawImage(image, this.x + this.canvasWidth, this.y, image.width/this.scale, image.height/this.scale);
+        this.x = -this.game.distance/speedScale % this.image.width;
 
-        if (this.x <= -this.canvasWidth) {
-            this.x = 0;
+        for(var i=0; i<this.canvasWidth/image.width+1; i++) {
+            // Pan background
+            this.context.drawImage(image, this.x + i*image.width, this.y, image.width/this.scale, image.height/this.scale);
         }
     };
 }
@@ -45,7 +45,18 @@ var Elephant = function(frameImages) {
     this.fps = 5;
     this.draw = function() {
         var frame = Math.floor(this.game.distance/4) % frameImages.length;
-        this.context.drawImage(frameImages[frame], 10, 100, 85, 85);
+        this.context.drawImage(frameImages[frame], 10, 100, 85, 100);
+    }
+}
+
+var Milestone = function(step) {
+    this.distance = step;
+    this.draw = function () {
+        this.context.fillStyle = 'rgb(127,127,127)';
+        this.context.fillText("" + this.distance, this.distance - this.game.distance, 30);
+        if (this.game.distance > this.distance + 100) {
+            this.distance += step;
+        }
     }
 }
 
@@ -53,7 +64,7 @@ var TextScroll = function() {
     this.text = "Get ready!";
     this.correct = [];
     this.colors = {
-        'init': 'rgb(127,127,127)',
+        'init': 'rgb(255, 255, 255)',
         'correct': 'rgb(127,255,127)',
         'false': 'rgb(255,127,127)'
     };
@@ -71,7 +82,6 @@ var TextScroll = function() {
                 color = this.colors[this.correct[i] ? 'correct' : 'false'];
             }
 
-            console.log(drawText, color);
             this.context.fillStyle = color;
             this.context.fillText(drawText, xpos, 130);
             xpos += this.context.measureText(drawText).width;
@@ -127,13 +137,17 @@ var Game = function(canvas) {
             Elephant.prototype.constructor = Elephant;
             TextScroll.prototype = Object.create(Drawable.prototype);
             TextScroll.prototype.constructor = TextScroll;
+            Milestone.prototype = Object.create(Drawable.prototype);
+            Milestone.prototype.constructor = Milestone;
 
-            this.place(new Background(imageRepository.background, 100), 0);
-            this.place(new Elephant(imageRepository.elephant), 10);
-            var grass = new Background(imageRepository.grass, 10);
-            this.place(grass, 20);
+            this.place(new Background(imageRepository.background, 50), 0);
+            this.place(new Background(imageRepository.background2, 7), 10);
+            var grass = new Background(imageRepository.grass, 0.5);
+            this.place(grass, 100);
+            this.place(new Elephant(imageRepository.elephant), 120);
             this.textScroll = new TextScroll();
-            this.place(this.textScroll, 100);
+            this.place(this.textScroll, 1000);
+            this.place(new Milestone(1000), 1000);
             return true;
         } else {
             return false;
