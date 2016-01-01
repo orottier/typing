@@ -6,30 +6,29 @@ var imageRepository = new function() {
 };
 
 // abstract class
-function Drawable() {
-    this.init = function(x, y) {
-        // Default variables
-        this.x = x;
-        this.y = y;
-    }
+var Drawable = function(x, y) {
+    console.log("New Drawable", x, y);
+    this.x = x;
+    this.y = y;
     this.speed = 0;
-    this.canvasWidth = 0;
-    this.canvasHeight = 0;
 
     // Define abstract function to be implemented in child objects
     this.draw = function() {
     };
 }
 
-function Background() {
-    this.speed = 1; // Redefine speed of the background for panning
+var Background = function(image) {
+    console.log("New background", image);
+    Drawable.call(this, 0, 0);
+    this.image = image;
+    this.speed = 1;
     // Implement abstract function
     this.draw = function() {
         // Pan background
         this.x -= this.speed;
-        this.context.drawImage(imageRepository.background, this.x, this.y);
+        this.context.drawImage(image, this.x, this.y);
         // Draw another image at the top edge of the first image
-        this.context.drawImage(imageRepository.background, this.x + this.canvasWidth, this.y);
+        this.context.drawImage(image, this.x + this.canvasWidth, this.y);
 
         // If the image scrolled off the screen, reset
         if (this.x <= -this.canvasWidth) {
@@ -37,24 +36,24 @@ function Background() {
         }
     };
 }
-// Set Background to inherit properties from Drawable
-Background.prototype = new Drawable();
 
-function Game() {
+var Game = function() {
     this.init = function() {
         // Get the canvas element
         this.bgCanvas = document.getElementById('canvas');
         // Test to see if canvas is supported
         if (this.bgCanvas.getContext) {
             this.bgContext = this.bgCanvas.getContext('2d');
-            // Initialize objects to contain their context and canvas
-            // information
-            Background.prototype.context = this.bgContext;
-            Background.prototype.canvasWidth = this.bgCanvas.width;
-            Background.prototype.canvasHeight = this.bgCanvas.height;
-            // Initialize the background object
-            this.background = new Background();
-            this.background.init(0,0); // Set draw point to 0,0
+
+            Drawable.prototype.context = this.bgContext;
+            Drawable.prototype.canvasWidth = this.bgCanvas.width;
+            Drawable.prototype.canvasHeight = this.bgCanvas.height;
+
+            // Set Background to inherit properties from Drawable
+            Background.prototype = Object.create(Drawable.prototype);
+            Background.prototype.constructor = Background;
+
+            this.background = new Background(imageRepository.background);
             return true;
         } else {
             return false;
@@ -89,11 +88,6 @@ window.requestAnimFrame = (function(){
 })();
 
 var game = new Game();
-
-function init() {
-    if(game.init()) {
-        game.start();
-    }
+if(game.init()) {
+    game.start();
 }
-
-init();
