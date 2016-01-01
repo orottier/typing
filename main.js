@@ -27,6 +27,7 @@ function keyUp(evt)
         typed = typed.substr(0, Math.max(0, typed.length-1));
     } else {
         typed += evt.key;
+        game.walk(20);
     }
     output.textContent = typed;
     if (typed === texts[round]) {
@@ -67,6 +68,7 @@ function initRound()
     typed = "";
     output.textContent = typed;
     text.textContent = texts[round];
+    game.setText(texts[round]);
     document.addEventListener('keypress', firstKeyUp);
 }
 

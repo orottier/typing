@@ -56,8 +56,9 @@ var Elephant = function(frameImages) {
 }
 
 var TextScroll = function() {
+    this.text = "Get ready!";
     this.draw = function() {
-        this.context.fillText("Je moet even deze tekst typen, joo?", 130, 130);
+        this.context.fillText(this.text, 130, 130);
     }
 }
 
@@ -98,7 +99,8 @@ var Game = function(canvas) {
             this.place(new Elephant(imageRepository.elephant), 10);
             var grass = new Background(imageRepository.grass, 10);
             this.place(grass, 20);
-            this.place(new TextScroll(), 100);
+            this.textScroll = new TextScroll();
+            this.place(this.textScroll, 100);
             return true;
         } else {
             return false;
@@ -148,6 +150,10 @@ var Game = function(canvas) {
         } else {
             this.speed = (this.speed + diff) / 2; //smooth
         }
+    }
+
+    this.setText = function(text) {
+        this.textScroll.text = text;
     }
 }
 
