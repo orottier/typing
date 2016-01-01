@@ -51,8 +51,47 @@ var Elephant = function(frameImages) {
 
 var TextScroll = function() {
     this.text = "Get ready!";
+    this.correct = [];
+    this.colors = {
+        'init': 'rgb(127,127,127)',
+        'correct': 'rgb(127,255,127)',
+        'false': 'rgb(255,127,127)'
+    };
+
     this.draw = function() {
-        this.context.fillText(this.text, 130, 130);
+        var xpos = 130;
+        var drawText, color;
+        for(var i=0; i<this.text.length; i++) {
+            if (i >= this.correct.length) {
+                drawText = this.text.substr(i);
+                color = this.colors.init;
+                i = this.text.length; // break loop
+            } else {
+                drawText = this.text[i];
+                color = this.colors[this.correct[i] ? 'correct' : 'false'];
+            }
+
+            console.log(drawText, color);
+            this.context.fillStyle = color;
+            this.context.fillText(drawText, xpos, 130);
+            xpos += this.context.measureText(drawText).width;
+        }
+    }
+
+    this.type = function(correct) {
+        if (!correct) {
+            // halt the elephant as a penalty
+            this.game.targetDistance = this.game.distance;
+        }
+        this.correct.push(correct);
+    }
+    this.backspace = function() {
+        this.correct.pop();
+    }
+
+    this.setText = function(text) {
+        this.text = text;
+        this.correct = [];
     }
 }
 
@@ -123,7 +162,6 @@ var Game = function(canvas) {
         this.previousTime = now;
         this.setSpeed();
         this.distance += this.speed/this.fps;
-        console.log('speed', this.speed, 'distance', this.distance);
 
         this.context.fillStyle = 'rgb(255,255,255)';
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -144,10 +182,6 @@ var Game = function(canvas) {
         } else {
             this.speed = (this.speed + diff) / 2; //smooth
         }
-    }
-
-    this.setText = function(text) {
-        this.textScroll.text = text;
     }
 }
 

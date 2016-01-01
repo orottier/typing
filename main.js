@@ -25,12 +25,15 @@ function keyUp(evt)
     evt.preventDefault();
     if (evt.keyCode === 8) {
         typed = typed.substr(0, Math.max(0, typed.length-1));
+        game.textScroll.backspace();
     } else {
         typed += evt.key;
         game.walk(20);
+        var correct = evt.key == texts[round][typed.length - 1];
+        game.textScroll.type(correct);
     }
     output.textContent = typed;
-    if (typed === texts[round]) {
+    if (typed.length === texts[round].length) {
         finishRound(true);
     }
     return false;
@@ -59,8 +62,19 @@ function finishRound(finish)
         results.textContent += "#" + (round+1) + ": " + cpm.toFixed(0) + " cpm - " + texts[round].length + " characters in " + (passed/1000).toFixed(2) + " seconds.\n";
 
         round++;
-        initRound();
+        if (round == texts.length) {
+            finishGame();
+        } else {
+            initRound();
+        }
     }
+}
+
+function finishGame()
+{
+    round = 0;
+    stopAll();
+    game.textScroll.setText("FINISHED!!");
 }
 
 function initRound()
@@ -68,7 +82,7 @@ function initRound()
     typed = "";
     output.textContent = typed;
     text.textContent = texts[round];
-    game.setText(texts[round]);
+    game.textScroll.setText(texts[round]);
     document.addEventListener('keypress', firstKeyUp);
 }
 
@@ -81,7 +95,9 @@ function initClick()
 }
 function stopAll()
 {
-    finishRound(false);
+    if (timer) { // game running
+        finishRound(false);
+    }
     gameButton.removeEventListener('click', stopAll);
     gameButton.textContent = 'Get ready';
     gameButton.addEventListener('click', initClick);
