@@ -45,7 +45,7 @@ var Elephant = function(frameImages) {
     this.fps = 5;
     this.draw = function() {
         var frame = Math.floor(this.game.distance/4) % frameImages.length;
-        this.context.drawImage(frameImages[frame], 10, 100, 85, 100);
+        this.context.drawImage(frameImages[frame], 10, 126, 89, 73);
     }
 }
 
