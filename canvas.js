@@ -42,15 +42,9 @@ var Background = function(image, speedScale) {
 }
 
 var Elephant = function(frameImages) {
-    this.counter = 0;
     this.fps = 5;
     this.draw = function() {
-        this.counter += 1;
-        var frame = Math.floor(this.counter/100*this.game.speed);
-        if (frame >= frameImages.length) {
-            this.counter = 0;
-            frame = 0;
-        }
+        var frame = Math.floor(this.game.distance/4) % frameImages.length;
         this.context.drawImage(frameImages[frame], 10, 100, 85, 85);
     }
 }
@@ -144,7 +138,7 @@ var Game = function(canvas) {
     }
     this.setSpeed = function() {
         var diff = 1.0*(this.targetDistance - this.distance);
-        if (diff < 1) {
+        if (diff < 5) {
             this.speed = 0;
             this.distance = this.targetDistance;
         } else {
