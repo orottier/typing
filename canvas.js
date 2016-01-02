@@ -35,11 +35,14 @@ var Background = function(image, speedScale) {
     this.scale = 1; //Math.min(image.width/this.canvasWidth, image.height/this.canvasHeight);
     // Implement abstract function
     this.draw = function() {
-        this.x = -this.game.distance/speedScale % this.image.width;
+        // image already loaded?
+        if (this.image.width) {
+            this.x = -this.game.distance/speedScale % this.image.width;
 
-        for(var i=0; i<this.canvasWidth/image.width+1; i++) {
-            // Pan background
-            this.context.drawImage(image, this.x + i*image.width, this.y, image.width/this.scale, image.height/this.scale);
+            for(var i=0; i<this.canvasWidth/image.width+1; i++) {
+                // Pan background
+                this.context.drawImage(image, this.x + i*image.width, this.y, image.width/this.scale, image.height/this.scale);
+            }
         }
     };
 }
