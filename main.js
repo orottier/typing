@@ -5,13 +5,10 @@ var results = document.getElementById('results');
 var gameButton = document.getElementById('gameButton');
 var startTime, timer;
 var round = 0;
+var currentLine;
 var typed;
 
-var texts = [
-    "Je moet even deze tekst typen okee?",
-    "Want je typt als een dikke slak!",
-    "Hop hop, geen foutjes maken euj."
-];
+var textRepository = new TextRepository();
 
 function firstKeyUp(evt)
 {
@@ -28,14 +25,14 @@ function keyUp(evt)
         game.textScroll.backspace();
     } else {
         typed += evt.key;
-        var correct = evt.key == texts[round][typed.length - 1];
+        var correct = evt.key == currentLine[typed.length - 1];
         if (correct) {
             game.walk(30);
         }
         game.textScroll.type(correct);
     }
     output.textContent = typed;
-    if (typed.length === texts[round].length) {
+    if (typed.length === currentLine.length) {
         finishRound(true);
     }
     return false;
@@ -60,11 +57,11 @@ function finishRound(finish)
 
     if (finish) {
         var passed = (new Date()).getTime() - startTime;
-        var cpm = texts[round].length / passed * 1000 * 60;
-        results.textContent += "#" + (round+1) + ": " + cpm.toFixed(0) + " cpm - " + texts[round].length + " characters in " + (passed/1000).toFixed(2) + " seconds.\n";
+        var cpm = currentLine.length / passed * 1000 * 60;
+        results.textContent += "#" + (round+1) + ": " + cpm.toFixed(0) + " cpm - " + currentLine.length + " characters in " + (passed/1000).toFixed(2) + " seconds.\n";
 
         round++;
-        if (round == texts.length) {
+        if (round == textRepository.totalLines) {
             finishGame();
         } else {
             initRound();
@@ -83,8 +80,9 @@ function initRound()
 {
     typed = "";
     output.textContent = typed;
-    text.textContent = texts[round];
-    game.textScroll.setText(texts[round]);
+    currentLine = textRepository.getLine();
+    text.textContent = currentLine;
+    game.textScroll.setText(currentLine);
     document.addEventListener('keypress', firstKeyUp);
 }
 

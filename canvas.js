@@ -138,7 +138,7 @@ var Game = function(canvas) {
                 alpha: false,
                 antialias: true,
             });
-            this.context.font = "30px 'sans serif'";
+            this.context.font = "25px 'sans serif'";
 
             Drawable.prototype.game = this;
             Drawable.prototype.context = this.context;
