@@ -104,14 +104,17 @@ var TextScroll = function() {
             this.game.targetDistance = this.game.distance;
         }
         this.correct.push(correct);
+        this.game.needRedraw = true;
     }
     this.backspace = function() {
         this.correct.pop();
+        this.game.needRedraw = true;
     }
 
     this.setText = function(text) {
         this.text = text;
         this.correct = [];
+        this.game.needRedraw = true;
     }
 }
 
@@ -126,6 +129,7 @@ var Game = function(canvas) {
     // to be drawn on each frame
     this.objects = [];
     this.previousTime = 0;
+    this.needRedraw = true;
 
     this.init = function() {
         // Test to see if canvas is supported
@@ -188,13 +192,17 @@ var Game = function(canvas) {
         this.fps = 1000/(now - this.previousTime);
         this.previousTime = now;
         this.setSpeed();
-        this.distance += this.speed/this.fps;
+        // only render if needed
+        if (this.speed || this.needRedraw) {
+            this.needRedraw = false;
+            this.distance += this.speed/this.fps;
 
-        this.context.fillStyle = 'rgb(255,255,255)';
-        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.context.fillStyle = 'rgb(127,127,127)';
-        for(var i=0; i<this.objects.length; i++) {
-            this.objects[i].object.draw();
+            this.context.fillStyle = 'rgb(255,255,255)';
+            this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.context.fillStyle = 'rgb(127,127,127)';
+            for(var i=0; i<this.objects.length; i++) {
+                this.objects[i].object.draw();
+            }
         }
     }
 

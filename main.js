@@ -28,8 +28,10 @@ function keyUp(evt)
         game.textScroll.backspace();
     } else {
         typed += evt.key;
-        game.walk(30);
         var correct = evt.key == texts[round][typed.length - 1];
+        if (correct) {
+            game.walk(30);
+        }
         game.textScroll.type(correct);
     }
     output.textContent = typed;
