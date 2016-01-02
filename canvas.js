@@ -8,6 +8,9 @@ var imageRepository = new function() {
     this.grass = new Image();
     this.grass.src = 'images/sprites/road.png';
 
+    this.house = new Image();
+    this.house.src = 'images/sprites/house.png';
+
     this.elephant = [];
     for(var i=1; i<=6; i++) {
         var frame = new Image();
@@ -42,10 +45,16 @@ var Background = function(image, speedScale) {
 }
 
 var Elephant = function(frameImages) {
-    this.fps = 5;
     this.draw = function() {
-        var frame = Math.floor(this.game.distance/4) % frameImages.length;
-        this.context.drawImage(frameImages[frame], 10, 126, 89, 73);
+        var lineUp = 8; // line up elephant leg movement with ground
+        var frame = Math.floor(this.game.distance/lineUp) % frameImages.length;
+        this.context.drawImage(frameImages[frame], 30, 126, 89, 73);
+    }
+}
+
+var StaticImage = function(image, distance, posy) {
+    this.draw = function() {
+        this.context.drawImage(image, distance - this.game.distance, posy, image.width, image.height);
     }
 }
 
@@ -55,6 +64,7 @@ var Milestone = function(step) {
         this.context.fillStyle = 'rgb(127,127,127)';
         this.context.fillText("" + this.distance, this.distance - this.game.distance, 30);
         if (this.game.distance > this.distance + 100) {
+            // put up a new milestone
             this.distance += step;
         }
     }
@@ -138,12 +148,15 @@ var Game = function(canvas) {
             TextScroll.prototype = Object.create(Drawable.prototype);
             TextScroll.prototype.constructor = TextScroll;
             Milestone.prototype = Object.create(Drawable.prototype);
+            StaticImage.prototype.constructor = StaticImage;
+            StaticImage.prototype = Object.create(Drawable.prototype);
             Milestone.prototype.constructor = Milestone;
 
             this.place(new Background(imageRepository.background, 50), 0);
             this.place(new Background(imageRepository.background2, 7), 10);
-            var grass = new Background(imageRepository.grass, 0.5);
+            var grass = new Background(imageRepository.grass, 1);
             this.place(grass, 100);
+            this.place(new StaticImage(imageRepository.house, 10, 100), 110);
             this.place(new Elephant(imageRepository.elephant), 120);
             this.textScroll = new TextScroll();
             this.place(this.textScroll, 1000);

@@ -28,7 +28,7 @@ function keyUp(evt)
         game.textScroll.backspace();
     } else {
         typed += evt.key;
-        game.walk(20);
+        game.walk(30);
         var correct = evt.key == texts[round][typed.length - 1];
         game.textScroll.type(correct);
     }
