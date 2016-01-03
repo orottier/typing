@@ -184,7 +184,7 @@ var Game = function(canvas) {
 
     this.place = function(object, zIndex) {
         for(var position=0; position<this.objects.length; position++) {
-            if (this.objects.zIndex > zIndex) {
+            if (this.objects[position].zIndex > zIndex) {
                 break;
             }
         }
