@@ -34,7 +34,7 @@ function setupPeer(conn)
         // Send messages
         conn.send('Hello!');
 
-        enableChat();
+        chat.enableChat();
     });
 }
 

@@ -8,8 +8,6 @@ var round = 0;
 var currentLine;
 var typed;
 
-var textRepository = new TextRepository();
-
 function firstKeyUp(evt)
 {
     document.removeEventListener('keypress', firstKeyUp);
