@@ -10,7 +10,7 @@ var Chat = function() {
         evt.preventDefault();
         if (this.chatEnabled) {
             var message = this.chatInput.value;
-            conn.send(message);
+            peerHelper.send('chat', message);
             log('You', message);
             this.chatInput.value = "";
             this.chatInput.focus();
