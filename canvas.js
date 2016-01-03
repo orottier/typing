@@ -11,6 +11,12 @@ var imageRepository = new function() {
     this.house = new Image();
     this.house.src = 'images/sprites/house.png';
 
+    this.house2 = new Image();
+    this.house2.src = 'images/sprites/house2.png';
+
+    this.girlfriend = new Image();
+    this.girlfriend.src = 'images/elephant/girlfriend.png';
+
     this.elephant = [];
     for(var i=1; i<=6; i++) {
         var frame = new Image();
@@ -163,7 +169,9 @@ var Game = function(canvas) {
             this.place(new Background(imageRepository.background2, 7), 10);
             var grass = new Background(imageRepository.grass, 1);
             this.place(grass, 100);
-            this.place(new StaticImage(imageRepository.house, 10, 100), 110);
+            this.place(new StaticImage(imageRepository.house, 10, 101), 110);
+            this.place(new StaticImage(imageRepository.girlfriend, 20000, 130), 110);
+            this.place(new StaticImage(imageRepository.house2, 20100, 60), 110);
             this.place(new Elephant(imageRepository.elephant), 120);
             this.textScroll = new TextScroll();
             this.place(this.textScroll, 1000);
