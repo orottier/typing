@@ -62,8 +62,10 @@ var Elephant = function(frameImages) {
 }
 
 var StaticImage = function(image, distance, posy) {
+    this.distance = distance;
+    this.posy = posy;
     this.draw = function() {
-        this.context.drawImage(image, distance - this.game.distance, posy, image.width, image.height);
+        this.context.drawImage(image, this.distance - this.game.distance, this.posy, image.width, image.height);
     }
 }
 
@@ -228,6 +230,15 @@ var Game = function(canvas) {
         } else {
             this.speed = (this.speed + diff) / 2; //smooth
         }
+    }
+
+    this.addOpponent = function() {
+        this.opponent = new StaticImage(imageRepository.elephant[0], 35, 126);
+        this.place(this.opponent, 110);
+    }
+    this.opponentState = function(distance) {
+        this.opponent.distance = 35 + distance;
+        this.needRedraw = true;
     }
 }
 

@@ -1,6 +1,7 @@
 var PeerHelper = function() {
     this.peer = new Peer({key: 'uwzql1hzgiepnwmi'});
     var that = this;
+    this.dataStreamInterval = null;
 
     this.peer.on('open', function(id) {
         document.getElementById('peerKey').textContent = id;
@@ -23,20 +24,29 @@ var PeerHelper = function() {
         }
     }
 
+    this.sendGameState = function() {
+        this.send('GameState', game.distance);
+    }
+
     this.setupPeer = function()
     {
         var conn = this.conn;
         this.conn.on('open', function() {
             // Receive messages
             conn.on('data', function(data) {
-                console.log('Received', data);
-                log(data.type + ' - Remote', data.data);
+                if (data.type == 'GameState') {
+                    game.opponentState(data.data);
+                } else {
+                    log(data.type + ' - Remote', data.data);
+                }
             });
 
             // Send messages
             that.send('Peer', 'Hello!');
 
             chat.enableChat();
+            game.addOpponent();
+            that.dataStreamInterval = setInterval(that.sendGameState.bind(that), 1000);
         });
     }
 
